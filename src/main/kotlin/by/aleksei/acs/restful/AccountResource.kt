@@ -5,7 +5,6 @@ import by.aleksei.acs.service.AccountService
 import by.aleksei.acs.service.HeaderService
 import by.aleksei.acs.util.ServiceResponse
 import org.springframework.stereotype.Component
-import sun.security.timestamp.TSResponse.BAD_REQUEST
 import javax.ws.rs.*
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.HttpHeaders
@@ -25,7 +24,7 @@ class AccountResource(
     override fun register(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
                 is ServiceResponse.Success -> getResponse(accountService.register(accountInfo))
-                is ServiceResponse.Error -> Response.status(BAD_REQUEST, headerResult.message).build()
+                is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
     @POST
@@ -35,7 +34,7 @@ class AccountResource(
     override fun login(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
                 is ServiceResponse.Success -> getResponse(accountService.login(accountInfo))
-                is ServiceResponse.Error -> Response.status(BAD_REQUEST, headerResult.message).build()
+                is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
     @GET
@@ -44,6 +43,6 @@ class AccountResource(
     override fun delete(@Context headers: HttpHeaders): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(accountService.delete(headerResult.data))
-                is ServiceResponse.Error -> Response.status(BAD_REQUEST, headerResult.message).build()
+                is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 }

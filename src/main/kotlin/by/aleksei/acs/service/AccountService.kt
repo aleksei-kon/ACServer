@@ -7,7 +7,8 @@ import by.aleksei.acs.entities.AccountInfo
 import by.aleksei.acs.entities.OperationStatus
 import by.aleksei.acs.entities.TokenInfo
 import by.aleksei.acs.entities.db.Account
-import by.aleksei.acs.repository.AccountRepository
+import by.aleksei.acs.entities.db.Token
+import by.aleksei.acs.repository.*
 import by.aleksei.acs.util.ServiceResponse
 import org.springframework.stereotype.Component
 import java.security.SecureRandom
@@ -27,7 +28,7 @@ class AccountService(private val accountRepository: AccountRepository) {
                 Account(
                         username = accountInfo.username,
                         password = accountInfo.password,
-                        tokens = ArrayList(listOf(token))
+                        tokens = mutableListOf(Token(token = token))
                 )
         )
 
@@ -46,7 +47,7 @@ class AccountService(private val accountRepository: AccountRepository) {
 
         return if (account != null) {
             val token = generateUniqueToken()
-            account.tokens.add(token)
+            account.tokens.add(Token(token = token))
             accountRepository.save(account)
 
             ServiceResponse.Success(TokenInfo(token))
