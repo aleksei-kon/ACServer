@@ -13,12 +13,9 @@ import javax.ws.rs.core.HttpHeaders.AUTHORIZATION
 class HeaderService(private val accountRepository: AccountRepository) {
 
     fun processHeaders(headers: HttpHeaders, isGuest: Boolean = false): ServiceResponse<String> {
-        //val userAgent = headers.getHeaderString(USER_AGENT)
         val token = headers.getHeaderString(AUTHORIZATION)
 
         return when {
-            //userAgent == null -> ServiceResponse.Error(BAD_USER_AGENT)
-            //!USER_AGENTS.contains(userAgent) -> ServiceResponse.Error(BAD_USER_AGENT)
             isGuest -> ServiceResponse.Success(EMPTY)
             token == null -> ServiceResponse.Error(BAD_TOKEN)
             accountRepository.isTokenExist(token) -> ServiceResponse.Success(token)

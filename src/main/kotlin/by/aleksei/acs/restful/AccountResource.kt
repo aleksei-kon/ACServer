@@ -15,13 +15,13 @@ import javax.ws.rs.core.Response
 @Path("account/")
 class AccountResource(
         private val headerService: HeaderService,
-        private val accountService: AccountService) : BaseResource(), IAccountResource {
+        private val accountService: AccountService) : BaseResource() {
 
     @POST
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    override fun register(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
+    fun register(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
                 is ServiceResponse.Success -> getResponse(accountService.register(accountInfo))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
@@ -31,7 +31,7 @@ class AccountResource(
     @Path("login")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    override fun login(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
+    fun login(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
                 is ServiceResponse.Success -> getResponse(accountService.login(accountInfo))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
@@ -40,7 +40,7 @@ class AccountResource(
     @GET
     @Path("delete")
     @Produces(MediaType.APPLICATION_JSON)
-    override fun delete(@Context headers: HttpHeaders): Response =
+    fun delete(@Context headers: HttpHeaders): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(accountService.delete(headerResult.data))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()

@@ -2,16 +2,15 @@ package by.aleksei.acs
 
 object Constants {
 
-    const val DEFAULT_INT = 0
     const val EMPTY = ""
+    const val DEFAULT_INT = 0
+    const val DEFAULT_DOUBLE = 0.0
+    const val UNIXTIME_DIVIDER = 1000L
+    const val EMPTY_ID = -1
+    const val FIRST_PAGE = 0
 
     object Header {
 
-        private const val ANDROID_CLIENT = "a_c_android_client"
-
-        val USER_AGENTS = mutableListOf(ANDROID_CLIENT)
-
-        const val BAD_USER_AGENT = "Bat user agent"
         const val BAD_TOKEN = "Bat token"
     }
 
@@ -20,5 +19,14 @@ object Constants {
         const val USERNAME_EXIST_MESSAGE = "Such username already exists"
         const val USERNAME_NOT_EXIST_MESSAGE = "Such username not exists"
         const val USERNAME_OR_PASSWORD_NOT_MATCH_MESSAGE = "Username or password do not match"
+    }
+
+    object SortTypes {
+
+        const val ALPHABET = 1
+        const val DATE_ASC = 2
+        const val DATE_DESC = 3
+        const val PRICE_ASC = 4
+        const val PRICE_DESC = 5
     }
 }
