@@ -26,6 +26,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}
+	implementation("org.glassfish.jersey.media:jersey-media-multipart")
 }
 
 tasks.withType<Test> {
