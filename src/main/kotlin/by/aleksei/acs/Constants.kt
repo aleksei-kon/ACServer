@@ -29,4 +29,10 @@ object Constants {
         const val PRICE_ASC = 4
         const val PRICE_DESC = 5
     }
+
+    object Image {
+
+        const val DEFAULT_PATH = "D:/images/"
+        const val ATTACHMENT_FILE = "attachment; filename"
+    }
 }

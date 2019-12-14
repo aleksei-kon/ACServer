@@ -21,7 +21,7 @@ class AccountResource(
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun register(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
+    fun registerAccount(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
                 is ServiceResponse.Success -> getResponse(accountService.register(accountInfo))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
@@ -31,7 +31,7 @@ class AccountResource(
     @Path("login")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun login(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
+    fun loginAccount(@Context headers: HttpHeaders, accountInfo: AccountInfo): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
                 is ServiceResponse.Success -> getResponse(accountService.login(accountInfo))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
@@ -40,7 +40,7 @@ class AccountResource(
     @GET
     @Path("delete")
     @Produces(MediaType.APPLICATION_JSON)
-    fun delete(@Context headers: HttpHeaders): Response =
+    fun deleteAccount(@Context headers: HttpHeaders): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(accountService.delete(headerResult.data))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()

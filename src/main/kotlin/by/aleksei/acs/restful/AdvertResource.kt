@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 
 @Component
-@Path("account/")
+@Path("advert/")
 class AdvertResource(
         private val headerService: HeaderService,
         private val advertService: AdvertService) : BaseResource() {
@@ -25,7 +25,7 @@ class AdvertResource(
     @Path("add")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun add(@Context headers: HttpHeaders, advertInfo: AdvertInfo): Response =
+    fun addAdvert(@Context headers: HttpHeaders, advertInfo: AdvertInfo): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(advertService.add(headerResult.data, advertInfo))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
@@ -35,7 +35,7 @@ class AdvertResource(
     @Path("update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun update(@Context headers: HttpHeaders, advertInfo: AdvertInfo): Response =
+    fun updateAdvert(@Context headers: HttpHeaders, advertInfo: AdvertInfo): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(advertService.update(headerResult.data, advertInfo))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
@@ -44,7 +44,7 @@ class AdvertResource(
     @GET
     @Path("delete")
     @Produces(MediaType.APPLICATION_JSON)
-    fun delete(@Context headers: HttpHeaders,
+    fun deleteAdvert(@Context headers: HttpHeaders,
                @QueryParam("advertId") advertId: Int = EMPTY_ID): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(advertService.delete(headerResult.data, advertId))
@@ -54,7 +54,7 @@ class AdvertResource(
     @GET
     @Path("get")
     @Produces(MediaType.APPLICATION_JSON)
-    fun get(@Context headers: HttpHeaders,
+    fun getAdvert(@Context headers: HttpHeaders,
             @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE,
             @QueryParam("username") username: String = EMPTY,
             @QueryParam("sortType") sortType: Int = DATE_DESC): Response =
