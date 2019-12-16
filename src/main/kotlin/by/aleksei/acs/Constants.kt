@@ -6,7 +6,7 @@ object Constants {
     const val DEFAULT_INT = 0
     const val DEFAULT_DOUBLE = 0.0
     const val UNIXTIME_DIVIDER = 1000L
-    const val EMPTY_ID = -1
+    const val EMPTY_ID = "-1"
     const val FIRST_PAGE = 0
 
     object Header {

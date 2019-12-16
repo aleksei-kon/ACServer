@@ -7,13 +7,11 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition
 import org.glassfish.jersey.media.multipart.FormDataParam
 import org.springframework.stereotype.Component
 import java.io.*
+import java.sql.Timestamp
 import javax.ws.rs.*
-import javax.ws.rs.core.Context
-import javax.ws.rs.core.HttpHeaders
 import javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
-
 
 @Component
 @Path("image/")
@@ -22,8 +20,7 @@ class ImageResource(private val headerService: HeaderService) : BaseResource() {
     @GET
     @Path("download/{fileName}")
     @Produces("image/png", "image/jpg", "image/gif")
-    fun downloadImage(@Context headers: HttpHeaders,
-                      @PathParam("fileName") fileName: String): Response {
+    fun downloadImage(@PathParam("fileName") fileName: String): Response {
         val file = File("$DEFAULT_PATH$fileName")
 
         return Response
@@ -31,29 +28,28 @@ class ImageResource(private val headerService: HeaderService) : BaseResource() {
                 .header(CONTENT_DISPOSITION, "$ATTACHMENT_FILE=\"$fileName\"")
                 .build()
     }
-    //http://192.168.100.38:8080/image/download/image1.jpg
 
     @POST
     @Path("upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
     fun uploadImage(
-            @Context headers: HttpHeaders,
-            @FormDataParam("uploadFile") fileInputStream: InputStream,
-            @FormDataParam("uploadFile") fileFormDataContentDisposition: FormDataContentDisposition
+            @FormDataParam("uploadFile") inputStream: InputStream,
+            @FormDataParam("uploadFile") form: FormDataContentDisposition
     ): Response {
-        val fileName = fileFormDataContentDisposition.fileName
-        val uploadFilePath = writeToFileServer(fileInputStream, fileName)
+        val fileName = form.fileName
+        val uploadFilePath = writeToFileStorage(inputStream, fileName)
 
-        return Response.ok(uploadFilePath).build()
+        return Response
+                .ok(uploadFilePath)
+                .build()
     }
 
-    private fun writeToFileServer(inputStream: InputStream, fileName: String): String {
+    private fun writeToFileStorage(inputStream: InputStream, fileName: String): String {
         var outputStream: OutputStream? = null
-        val qualifiedUploadFilePath = "$DEFAULT_PATH$fileName"
+        val newFileName = "${Timestamp(System.currentTimeMillis()).time}$fileName"
 
         try {
-            outputStream = FileOutputStream(File(qualifiedUploadFilePath))
+            outputStream = FileOutputStream(File("$DEFAULT_PATH$newFileName"))
             var read = 0
             val bytes = ByteArray(1024)
             read = inputStream.read(bytes)
@@ -68,7 +64,6 @@ class ImageResource(private val headerService: HeaderService) : BaseResource() {
             outputStream?.close()
         }
 
-        return qualifiedUploadFilePath
+        return newFileName
     }
-
 }

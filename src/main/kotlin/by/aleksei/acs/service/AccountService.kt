@@ -3,9 +3,9 @@ package by.aleksei.acs.service
 import by.aleksei.acs.Constants.Account.USERNAME_EXIST_MESSAGE
 import by.aleksei.acs.Constants.Account.USERNAME_NOT_EXIST_MESSAGE
 import by.aleksei.acs.Constants.Account.USERNAME_OR_PASSWORD_NOT_MATCH_MESSAGE
+import by.aleksei.acs.entities.AccountConfig
 import by.aleksei.acs.entities.AccountInfo
 import by.aleksei.acs.entities.OperationStatus
-import by.aleksei.acs.entities.TokenInfo
 import by.aleksei.acs.entities.db.Account
 import by.aleksei.acs.entities.db.Token
 import by.aleksei.acs.repository.*
@@ -17,25 +17,32 @@ import java.util.*
 @Component
 class AccountService(private val accountRepository: AccountRepository) {
 
-    fun register(accountInfo: AccountInfo): ServiceResponse<TokenInfo> {
+    fun register(accountInfo: AccountInfo): ServiceResponse<AccountConfig> {
         if (accountRepository.isUsernameExist(accountInfo.username)) {
             return ServiceResponse.Error(USERNAME_EXIST_MESSAGE)
         }
 
         val token = generateUniqueToken()
 
-        accountRepository.save(
-                Account(
-                        username = accountInfo.username,
-                        password = accountInfo.password,
-                        tokens = mutableListOf(Token(token = token))
-                )
+        val newAccount = Account(
+                username = accountInfo.username,
+                password = accountInfo.password,
+                tokens = mutableListOf(Token(token = token)),
+                isAdmin = false
         )
 
-        return ServiceResponse.Success(TokenInfo(token))
+        accountRepository.save(newAccount)
+
+        return ServiceResponse.Success(
+                AccountConfig(
+                        token = token,
+                        isloggedin = true.toString(),
+                        isadmin = newAccount.isAdmin.toString()
+                )
+        )
     }
 
-    fun login(accountInfo: AccountInfo): ServiceResponse<TokenInfo> {
+    fun login(accountInfo: AccountInfo): ServiceResponse<AccountConfig> {
         if (!accountRepository.isUsernameExist(accountInfo.username)) {
             return ServiceResponse.Error(USERNAME_NOT_EXIST_MESSAGE)
         }
@@ -50,7 +57,13 @@ class AccountService(private val accountRepository: AccountRepository) {
             account.tokens.add(Token(token = token))
             accountRepository.save(account)
 
-            ServiceResponse.Success(TokenInfo(token))
+            ServiceResponse.Success(
+                    AccountConfig(
+                            token = token,
+                            isloggedin = true.toString(),
+                            isadmin = account.isAdmin.toString()
+                    )
+            )
         } else {
             ServiceResponse.Error(USERNAME_OR_PASSWORD_NOT_MATCH_MESSAGE)
         }

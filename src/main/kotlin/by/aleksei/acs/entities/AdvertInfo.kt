@@ -1,12 +1,17 @@
 package by.aleksei.acs.entities
 
-import by.aleksei.acs.Constants.DEFAULT_DOUBLE
 import by.aleksei.acs.Constants.EMPTY
 
 data class AdvertInfo(
-        val title: String = EMPTY,
-        val price: Double = DEFAULT_DOUBLE,
-        val description: String = EMPTY,
-        val phone: String = EMPTY,
-        val photos: MutableList<String> = mutableListOf()
+        val id: String = EMPTY,
+        val photos: List<String>? = null,
+        val isBookmark: Boolean? = null,
+        val title: String? = null,
+        val price: String? = null,
+        val location: String? = null,
+        val date: Long? = null,
+        val views: Int? = null,
+        val synopsis: String? = null,
+        val username: String? = null,
+        val phone: String? = null
 )

@@ -18,6 +18,9 @@ data class Account(
         val password: String = EMPTY,
 
         @Column(nullable = false)
+        val isAdmin: Boolean = false,
+
+        @Column(nullable = false)
         @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
         val tokens: MutableList<Token> = mutableListOf()
 )
