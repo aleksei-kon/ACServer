@@ -20,9 +20,7 @@ class AdvertService(
         private val advertRepository: AdvertRepository) {
 
     fun add(token: String, advertInfo: NewDetailsModel): ServiceResponse<Boolean> {
-
         val account = accountRepository.getAccountByToken(token)
-
         val advert = Advert(
                 title = advertInfo.title,
                 price = advertInfo.price,
@@ -70,18 +68,11 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(
-                when {
-                    list.size < pageNumber * 10 -> emptyList()
-                    list.size <= pageNumber * 10 + 20 -> list.subList(pageNumber * 10, list.size)
-                    else -> list.subList(pageNumber * 10, pageNumber * 10 + 20)
-                }
-        )
+        return ServiceResponse.Success(getPageSublist(list, pageNumber))
     }
 
     fun getMyAds(token: String, pageNumber: Int): ServiceResponse<List<AdItem>> {
         val account = accountRepository.getAccountByToken(token)
-
         val list = advertRepository.findAll()
                 .filter { it.userId == account?.id ?: EMPTY }
                 .map {
@@ -100,18 +91,11 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(
-                when {
-                    list.size < pageNumber * 10 -> emptyList()
-                    list.size <= pageNumber * 10 + 20 -> list.subList(pageNumber * 10, list.size)
-                    else -> list.subList(pageNumber * 10, pageNumber * 10 + 20)
-                }
-        )
+        return ServiceResponse.Success(getPageSublist(list, pageNumber))
     }
 
     fun getBookmarks(pageNumber: Int): ServiceResponse<List<AdItem>> {
         val list = mutableListOf<AdItem>()
-
         for (i in 1..20) {
             list.add(AdItem(
                     id = (1..8845648).random().toString(),
@@ -145,13 +129,7 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(
-                when {
-                    list.size < pageNumber * 10 -> emptyList()
-                    list.size <= pageNumber * 10 + 20 -> list.subList(pageNumber * 10, list.size)
-                    else -> list.subList(pageNumber * 10, pageNumber * 10 + 20)
-                }
-        )
+        return ServiceResponse.Success(getPageSublist(list, pageNumber))
     }
 
     fun getSearch(searchText: String, pageNumber: Int, sortType: Int): ServiceResponse<List<AdItem>> {
@@ -173,21 +151,13 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(
-                when {
-                    list.size < pageNumber * 10 -> emptyList()
-                    list.size <= pageNumber * 10 + 20 -> list.subList(pageNumber * 10, list.size)
-                    else -> list.subList(pageNumber * 10, pageNumber * 10 + 20)
-                }
-        )
+        return ServiceResponse.Success(getPageSublist(list, pageNumber))
     }
 
     fun getDetails(detailsId: String): ServiceResponse<AdvertInfo> {
         val details = advertRepository.findByIdOrNull(detailsId.toIntOrNull() ?: -1)
                 ?: return ServiceResponse.Success(AdvertInfo(id = detailsId))
-
         val account = accountRepository.findByIdOrNull(details.userId)
-
         val response = AdvertInfo(
                 id = details.id.toString(),
                 photos = details.photos.map { it.photo },
@@ -202,5 +172,13 @@ class AdvertService(
         )
 
         return ServiceResponse.Success(response)
+    }
+
+    private fun getPageSublist(list: List<AdItem>, pageNumber: Int): List<AdItem> {
+        return when {
+            list.size < pageNumber * 10 -> emptyList()
+            list.size <= pageNumber * 10 + 20 -> list.subList(pageNumber * 10, list.size)
+            else -> list.subList(pageNumber * 10, pageNumber * 10 + 20)
+        }
     }
 }
