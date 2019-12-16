@@ -6,6 +6,7 @@ import by.aleksei.acs.Constants.FIRST_PAGE
 import by.aleksei.acs.Constants.SortTypes.ALPHABET
 import by.aleksei.acs.Constants.SortTypes.DATE_DESC
 import by.aleksei.acs.entities.AdvertInfo
+import by.aleksei.acs.entities.NewDetailsModel
 import by.aleksei.acs.service.AdvertService
 import by.aleksei.acs.service.HeaderService
 import by.aleksei.acs.util.ServiceResponse
@@ -23,10 +24,10 @@ class AdvertResource(
         private val advertService: AdvertService) : BaseResource() {
 
     @POST
-    @Path("add")
+    @Path("newDetails")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun addAdvert(@Context headers: HttpHeaders, advertInfo: AdvertInfo): Response =
+    fun addAdvert(@Context headers: HttpHeaders, advertInfo: NewDetailsModel): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(advertService.add(headerResult.data, advertInfo))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
@@ -80,7 +81,7 @@ class AdvertResource(
     fun getMyAds(@Context headers: HttpHeaders,
                  @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
-                is ServiceResponse.Success -> getResponse(advertService.getMyAds(pageNumber))
+                is ServiceResponse.Success -> getResponse(advertService.getMyAds(headerResult.data, pageNumber))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 

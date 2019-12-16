@@ -1,12 +1,12 @@
 package by.aleksei.acs.entities.db
 
-import by.aleksei.acs.Constants.DEFAULT_DOUBLE
 import by.aleksei.acs.Constants.DEFAULT_INT
 import by.aleksei.acs.Constants.EMPTY
 import by.aleksei.acs.Constants.UNIXTIME_DIVIDER
 import java.util.*
 import javax.persistence.*
 
+@Entity
 data class Advert(
 
         @Id
@@ -17,18 +17,31 @@ data class Advert(
         val title: String = EMPTY,
 
         @Column(nullable = false)
-        val price: Double = DEFAULT_DOUBLE,
+        val price: String = EMPTY,
 
         @Column(nullable = false)
-        val description: String = EMPTY,
+        val userId: Int = -1,
+
+        @Column(nullable = false)
+        val isShown: Boolean = false,
+
+        @Column(nullable = false)
+        val location: String = EMPTY,
+
+        @Column(nullable = false)
+        val views: Int = 0,
+
+        @Column(nullable = false)
+        val synopsis: String = EMPTY,
 
         @Column(nullable = false)
         val phone: String = EMPTY,
 
         @Column(nullable = false)
-        val unixtimeDate: Long = Date().time / UNIXTIME_DIVIDER,
+        val date: Long = Date().time / UNIXTIME_DIVIDER,
 
         @Column(nullable = false)
         @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
-        val photos: MutableList<String> = mutableListOf()
+        val photos: MutableList<Photo> = mutableListOf()
 )
+
