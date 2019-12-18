@@ -22,6 +22,10 @@ data class Account(
 
         @Column(nullable = false)
         @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
-        val tokens: MutableList<Token> = mutableListOf()
+        val tokens: MutableList<Token> = mutableListOf(),
 
+        @Column(nullable = false)
+        @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
+        @JoinTable
+        val bookmarkIds: MutableList<BookmarkId> = mutableListOf()
 )

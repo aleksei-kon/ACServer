@@ -6,6 +6,7 @@ import by.aleksei.acs.entities.AdvertInfo
 import by.aleksei.acs.entities.NewDetailsModel
 import by.aleksei.acs.entities.OperationStatus
 import by.aleksei.acs.entities.db.Advert
+import by.aleksei.acs.entities.db.BookmarkId
 import by.aleksei.acs.entities.db.Photo
 import by.aleksei.acs.repository.AccountRepository
 import by.aleksei.acs.repository.AdvertRepository
@@ -37,6 +38,28 @@ class AdvertService(
         return ServiceResponse.Success(true)
     }
 
+    fun addRemoveToBookmark(token: String, bookmarkId: Int): ServiceResponse<Boolean> {
+        val account = accountRepository.getAccountByToken(token)
+        account?.bookmarkIds?.add(BookmarkId(bookmarkId))
+        account?.let { accountRepository.save(it) }
+
+        return ServiceResponse.Success(true)
+    }
+
+    fun showHideAd(token: String, advertId: Int): ServiceResponse<Boolean> {
+        val account = accountRepository.getAccountByToken(token)
+
+        return if (account?.isAdmin == true) {
+            val advert = advertRepository.findByIdOrNull(advertId)
+            val newAdvert = advert?.copy(isShown = !advert.isShown)
+            newAdvert?.let { advertRepository.save(it) }
+
+            ServiceResponse.Success(true)
+        } else {
+            ServiceResponse.Error("showHide function only for admin users")
+        }
+    }
+
     fun update(token: String, advertInfo: AdvertInfo): ServiceResponse<OperationStatus> {
         return ServiceResponse.Success(OperationStatus(false))
     }
@@ -51,6 +74,7 @@ class AdvertService(
 
     fun getLastAds(pageNumber: Int): ServiceResponse<List<AdItem>> {
         val list = advertRepository.findAll()
+                .sortedByDescending { it.date }
                 .filter { it.isShown }
                 .map {
                     AdItem(
@@ -74,6 +98,7 @@ class AdvertService(
     fun getMyAds(token: String, pageNumber: Int): ServiceResponse<List<AdItem>> {
         val account = accountRepository.getAccountByToken(token)
         val list = advertRepository.findAll()
+                .sortedByDescending { it.date }
                 .filter { it.userId == account?.id ?: EMPTY }
                 .map {
                     AdItem(
@@ -94,24 +119,36 @@ class AdvertService(
         return ServiceResponse.Success(getPageSublist(list, pageNumber))
     }
 
-    fun getBookmarks(pageNumber: Int): ServiceResponse<List<AdItem>> {
-        val list = mutableListOf<AdItem>()
-        for (i in 1..20) {
-            list.add(AdItem(
-                    id = (1..8845648).random().toString(),
-                    photoUrl = "image4.jpg",
-                    title = "Page $pageNumber",
-                    price = "1500",
-                    place = "Moskou",
-                    views = 128
-            ))
-        }
+    fun getBookmarks(token: String, pageNumber: Int): ServiceResponse<List<AdItem>> {
+        val account = accountRepository.getAccountByToken(token)
 
-        return ServiceResponse.Success(list)
+        val userBookmarkIds = account?.bookmarkIds?.map { it.bookmarkId } ?: emptyList()
+
+        val list = advertRepository.findAll()
+                .sortedByDescending { it.date }
+                .filter { userBookmarkIds.contains(it.id) && it.isShown }
+                .map {
+                    AdItem(
+                            id = it.id.toString(),
+                            photoUrl = if (it.photos.isNotEmpty()) {
+                                it.photos[0].photo
+                            } else {
+                                EMPTY
+                            },
+                            date = it.date,
+                            title = it.title,
+                            price = it.price,
+                            place = it.location,
+                            views = it.views
+                    )
+                }
+
+        return ServiceResponse.Success(getPageSublist(list, pageNumber))
     }
 
     fun getAdRequests(pageNumber: Int): ServiceResponse<List<AdItem>> {
         val list = advertRepository.findAll()
+                .sortedByDescending { it.date }
                 .filter { !it.isShown }
                 .map {
                     AdItem(
@@ -133,8 +170,13 @@ class AdvertService(
     }
 
     fun getSearch(searchText: String, pageNumber: Int, sortType: Int): ServiceResponse<List<AdItem>> {
+        if (searchText.isEmpty()) {
+            return ServiceResponse.Success(emptyList())
+        }
+
         val list = advertRepository.findAll()
-                .filter { it.title.contains(searchText) }
+                .sortedByDescending { it.date }
+                .filter { it.title.contains(searchText) && it.isShown }
                 .map {
                     AdItem(
                             id = it.id.toString(),
@@ -176,9 +218,9 @@ class AdvertService(
 
     private fun getPageSublist(list: List<AdItem>, pageNumber: Int): List<AdItem> {
         return when {
-            list.size < pageNumber * 10 -> emptyList()
-            list.size <= pageNumber * 10 + 20 -> list.subList(pageNumber * 10, list.size)
-            else -> list.subList(pageNumber * 10, pageNumber * 10 + 20)
+            list.size < pageNumber * 30 -> emptyList()
+            list.size < pageNumber * 30 + 30 -> list.subList(pageNumber * 30, list.size)
+            else -> list.subList(pageNumber * 30, pageNumber * 30 + 30)
         }
     }
 }

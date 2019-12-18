@@ -33,6 +33,22 @@ class AdvertResource(
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
+    @GET
+    @Path("addRemoveToBookmark/{bookmarkId}")
+    fun addRemoveToBookmark(@Context headers: HttpHeaders, @PathParam("bookmarkId") bookmarkId: Int): Response =
+            when (val headerResult = headerService.processHeaders(headers)) {
+                is ServiceResponse.Success -> getResponse(advertService.addRemoveToBookmark(headerResult.data, bookmarkId))
+                is ServiceResponse.Error -> Response.ok(headerResult).build()
+            }
+
+    @GET
+    @Path("showHideAd/{id}")
+    fun showHideAd(@Context headers: HttpHeaders, @PathParam("id") adId: Int): Response =
+            when (val headerResult = headerService.processHeaders(headers)) {
+                is ServiceResponse.Success -> getResponse(advertService.showHideAd(headerResult.data, adId))
+                is ServiceResponse.Error -> Response.ok(headerResult).build()
+            }
+
     @POST
     @Path("update")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -80,7 +96,7 @@ class AdvertResource(
     @Produces(MediaType.APPLICATION_JSON)
     fun getMyAds(@Context headers: HttpHeaders,
                  @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
-            when (val headerResult = headerService.processHeaders(headers, true)) {
+            when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(advertService.getMyAds(headerResult.data, pageNumber))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
@@ -90,8 +106,8 @@ class AdvertResource(
     @Produces(MediaType.APPLICATION_JSON)
     fun getBookmarks(@Context headers: HttpHeaders,
                      @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
-            when (val headerResult = headerService.processHeaders(headers, true)) {
-                is ServiceResponse.Success -> getResponse(advertService.getBookmarks(pageNumber))
+            when (val headerResult = headerService.processHeaders(headers)) {
+                is ServiceResponse.Success -> getResponse(advertService.getBookmarks(headerResult.data, pageNumber))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
@@ -113,7 +129,7 @@ class AdvertResource(
     @Produces(MediaType.APPLICATION_JSON)
     fun getAdRequests(@Context headers: HttpHeaders,
                       @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
-            when (val headerResult = headerService.processHeaders(headers, true)) {
+            when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(advertService.getAdRequests(pageNumber))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
