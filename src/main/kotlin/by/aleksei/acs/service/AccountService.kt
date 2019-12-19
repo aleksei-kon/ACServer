@@ -27,7 +27,7 @@ class AccountService(private val accountRepository: AccountRepository) {
         val newAccount = Account(
                 username = accountInfo.username,
                 password = accountInfo.password,
-                tokens = mutableListOf(Token(token = token)),
+                tokens = mutableSetOf(Token(token = token)),
                 isAdmin = false
         )
 

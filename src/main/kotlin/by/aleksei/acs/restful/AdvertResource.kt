@@ -34,16 +34,17 @@ class AdvertResource(
             }
 
     @GET
-    @Path("addRemoveToBookmark/{bookmarkId}")
-    fun addRemoveToBookmark(@Context headers: HttpHeaders, @PathParam("bookmarkId") bookmarkId: Int): Response =
+    @Path("addRemoveToBookmark")
+    fun addRemoveToBookmark(@Context headers: HttpHeaders, @QueryParam("id") adId: Int = -1): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
-                is ServiceResponse.Success -> getResponse(advertService.addRemoveToBookmark(headerResult.data, bookmarkId))
+                is ServiceResponse.Success -> getResponse(advertService.addRemoveToBookmark(headerResult.data, adId))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
     @GET
-    @Path("showHideAd/{id}")
-    fun showHideAd(@Context headers: HttpHeaders, @PathParam("id") adId: Int): Response =
+    @Path("showHideAd")
+    fun showHideAd(@Context headers: HttpHeaders,
+                   @QueryParam("id") adId: Int = -1): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
                 is ServiceResponse.Success -> getResponse(advertService.showHideAd(headerResult.data, adId))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()

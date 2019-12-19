@@ -4,8 +4,9 @@ import by.aleksei.acs.Constants.EMPTY
 
 data class AdvertInfo(
         val id: String = EMPTY,
+        val isShown: String? = null,
+        val isBookmark: String? = null,
         val photos: List<String>? = null,
-        val isBookmark: Boolean? = null,
         val title: String? = null,
         val price: String? = null,
         val location: String? = null,

@@ -200,12 +200,16 @@ class AdvertService(
         val details = advertRepository.findByIdOrNull(detailsId.toIntOrNull() ?: -1)
                 ?: return ServiceResponse.Success(AdvertInfo(id = detailsId))
         val account = accountRepository.findByIdOrNull(details.userId)
+        val accountBookmarks = account?.bookmarkIds ?: emptyList<BookmarkId>()
+
         val response = AdvertInfo(
                 id = details.id.toString(),
                 photos = details.photos.map { it.photo },
                 title = details.title,
                 price = details.price,
+                isBookmark = accountBookmarks.map { it.bookmarkId }.contains(details.id).toString(),
                 location = details.location,
+                isShown = "true",//details.isShown.toString(),
                 date = details.date,
                 views = details.views,
                 synopsis = details.synopsis,
