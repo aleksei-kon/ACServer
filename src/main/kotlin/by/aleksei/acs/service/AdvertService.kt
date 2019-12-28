@@ -209,13 +209,19 @@ class AdvertService(
                 price = details.price,
                 isBookmark = accountBookmarks.map { it.bookmarkId }.contains(details.id).toString(),
                 location = details.location,
-                isShown = "true",//details.isShown.toString(),
+                isShown = details.isShown.toString(),
                 date = details.date,
                 views = details.views,
                 synopsis = details.synopsis,
                 username = account?.username ?: EMPTY,
                 phone = details.phone
         )
+
+        val updatedDetails = details.copy(
+                views = details.views + 1
+        )
+
+        advertRepository.save(updatedDetails)
 
         return ServiceResponse.Success(response)
     }
