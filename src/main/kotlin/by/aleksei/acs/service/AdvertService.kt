@@ -4,7 +4,7 @@ import by.aleksei.acs.Constants.EMPTY
 import by.aleksei.acs.entities.AdItem
 import by.aleksei.acs.entities.AdvertInfo
 import by.aleksei.acs.entities.NewDetailsModel
-import by.aleksei.acs.entities.OperationStatus
+import by.aleksei.acs.entities.UpdateDetailsModel
 import by.aleksei.acs.entities.db.Advert
 import by.aleksei.acs.entities.db.BookmarkId
 import by.aleksei.acs.entities.db.Photo
@@ -38,38 +38,84 @@ class AdvertService(
         return ServiceResponse.Success(true)
     }
 
-    fun addRemoveToBookmark(token: String, bookmarkId: Int): ServiceResponse<Boolean> {
+    fun addRemoveToBookmark(token: String, bookmarkId: Int) = try {
         val account = accountRepository.getAccountByToken(token)
-        account?.bookmarkIds?.add(BookmarkId(bookmarkId))
+        val bookmark = BookmarkId(bookmarkId = bookmarkId)
+
+        if (account?.bookmarkIds?.contains(bookmark) == true) {
+            account.bookmarkIds.remove(bookmark)
+        } else {
+            account?.bookmarkIds?.add(bookmark)
+        }
+
         account?.let { accountRepository.save(it) }
 
-        return ServiceResponse.Success(true)
+        true
+    } catch (e: Exception) {
+        false
     }
 
-    fun showHideAd(token: String, advertId: Int): ServiceResponse<Boolean> {
+    fun showHideAd(token: String, advertId: Int) = try {
         val account = accountRepository.getAccountByToken(token)
 
-        return if (account?.isAdmin == true) {
+        if (account?.isAdmin == true) {
             val advert = advertRepository.findByIdOrNull(advertId)
             val newAdvert = advert?.copy(isShown = !advert.isShown)
             newAdvert?.let { advertRepository.save(it) }
 
-            ServiceResponse.Success(true)
+            true
         } else {
-            ServiceResponse.Error("showHide function only for admin users")
+            false
+        }
+    } catch (e: Exception) {
+        false
+    }
+
+    fun update(token: String, advertInfo: UpdateDetailsModel): Boolean {
+        try {
+            val account = accountRepository.getAccountByToken(token)
+
+            advertRepository.findByIdOrNull(advertInfo.id)?.let { advert ->
+                if (advert.userId == account?.id) {
+                    val updatedAd = advert.copy(
+                            title = advertInfo.title,
+                            price = advertInfo.price,
+                            userId = account.id,
+                            isShown = false,
+                            location = advertInfo.location,
+                            synopsis = advertInfo.synopsis,
+                            phone = advertInfo.phone,
+                            photos = advertInfo.photos.map { Photo(photo = it) }.toMutableList()
+
+                    )
+
+                    advertRepository.save(updatedAd)
+
+                    return true
+                }
+            }
+
+            return false
+        } catch (e: Exception) {
+            return false
         }
     }
 
-    fun update(token: String, advertInfo: AdvertInfo): ServiceResponse<OperationStatus> {
-        return ServiceResponse.Success(OperationStatus(false))
-    }
+    fun delete(token: String, advertId: Int): Boolean {
+        try {
+            val account = accountRepository.getAccountByToken(token)
 
-    fun delete(token: String, advertId: String): ServiceResponse<OperationStatus> {
-        return ServiceResponse.Success(OperationStatus(false))
-    }
+            advertRepository.findByIdOrNull(advertId)?.let {
+                if (it.userId == account?.id) {
+                    advertRepository.delete(it)
+                    return true
+                }
+            }
 
-    fun get(pageNumber: Int, username: String, sortType: Int): ServiceResponse<List<Advert>> {
-        return ServiceResponse.Success(emptyList())
+            return false
+        } catch (e: Exception) {
+            return false
+        }
     }
 
     fun getLastAds(pageNumber: Int): ServiceResponse<List<AdItem>> {
@@ -196,32 +242,36 @@ class AdvertService(
         return ServiceResponse.Success(getPageSublist(list, pageNumber))
     }
 
-    fun getDetails(detailsId: String): ServiceResponse<AdvertInfo> {
-        val details = advertRepository.findByIdOrNull(detailsId.toIntOrNull() ?: -1)
+    fun getDetails(token: String, detailsId: Int): ServiceResponse<AdvertInfo> {
+        val details = advertRepository.findByIdOrNull(detailsId)
                 ?: return ServiceResponse.Success(AdvertInfo(id = detailsId))
-        val account = accountRepository.findByIdOrNull(details.userId)
-        val accountBookmarks = account?.bookmarkIds ?: emptyList<BookmarkId>()
-
-        val response = AdvertInfo(
-                id = details.id.toString(),
-                photos = details.photos.map { it.photo },
-                title = details.title,
-                price = details.price,
-                isBookmark = accountBookmarks.map { it.bookmarkId }.contains(details.id).toString(),
-                location = details.location,
-                isShown = details.isShown.toString(),
-                date = details.date,
-                views = details.views,
-                synopsis = details.synopsis,
-                username = account?.username ?: EMPTY,
-                phone = details.phone
-        )
+        val detailsAccount = accountRepository.findByIdOrNull(details.userId)
+        val account = accountRepository.getAccountByToken(token)
+        val accountBookmarks = account?.bookmarkIds ?: mutableSetOf()
 
         val updatedDetails = details.copy(
                 views = details.views + 1
         )
 
         advertRepository.save(updatedDetails)
+
+        val isShown = updatedDetails.isShown
+        val isBookmark = accountBookmarks.map { it.bookmarkId }.contains(updatedDetails.id)
+
+        val response = AdvertInfo(
+                id = updatedDetails.id,
+                photos = updatedDetails.photos.map { it.photo },
+                title = updatedDetails.title,
+                price = updatedDetails.price,
+                location = updatedDetails.location,
+                date = updatedDetails.date,
+                views = updatedDetails.views,
+                synopsis = updatedDetails.synopsis,
+                username = detailsAccount?.username ?: EMPTY,
+                phone = updatedDetails.phone,
+                bookmark = isBookmark,
+                showed = isShown
+        )
 
         return ServiceResponse.Success(response)
     }

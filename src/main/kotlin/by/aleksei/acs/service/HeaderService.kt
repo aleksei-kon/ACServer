@@ -16,7 +16,11 @@ class HeaderService(private val accountRepository: AccountRepository) {
         val token = headers.getHeaderString(AUTHORIZATION)
 
         return when {
-            isGuest -> ServiceResponse.Success(EMPTY)
+            isGuest -> if (token.isNullOrEmpty()) {
+                ServiceResponse.Success(EMPTY)
+            } else {
+                ServiceResponse.Success(token)
+            }
             token == null -> ServiceResponse.Error(BAD_TOKEN)
             accountRepository.isTokenExist(token) -> ServiceResponse.Success(token)
             else -> ServiceResponse.Error(BAD_TOKEN)

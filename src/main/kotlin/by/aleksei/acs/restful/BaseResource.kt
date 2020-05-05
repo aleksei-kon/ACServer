@@ -5,7 +5,7 @@ import javax.ws.rs.core.Response
 
 abstract class BaseResource {
 
-    protected fun <T> getResponse(result: ServiceResponse<T>): Response =
+    protected fun <T> getJsonResponse(result: ServiceResponse<T>): Response =
             when (result) {
                 is ServiceResponse.Success -> Response.ok(result.data).build()
                 is ServiceResponse.Error -> Response.ok(result).build()

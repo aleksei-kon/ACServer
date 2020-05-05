@@ -36,8 +36,8 @@ class AccountService(private val accountRepository: AccountRepository) {
         return ServiceResponse.Success(
                 AccountConfig(
                         token = token,
-                        isloggedin = true.toString(),
-                        isadmin = newAccount.isAdmin.toString()
+                        isloggedin = true,
+                        isadmin = newAccount.isAdmin
                 )
         )
     }
@@ -60,8 +60,8 @@ class AccountService(private val accountRepository: AccountRepository) {
             ServiceResponse.Success(
                     AccountConfig(
                             token = token,
-                            isloggedin = true.toString(),
-                            isadmin = account.isAdmin.toString()
+                            isloggedin = true,
+                            isadmin = account.isAdmin
                     )
             )
         } else {
