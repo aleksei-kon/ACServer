@@ -15,6 +15,8 @@ import by.aleksei.acs.util.ServiceResponse
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 
+private const val PAGE_SIZE = 25
+
 @Component
 class AdvertService(
         private val accountRepository: AccountRepository,
@@ -118,7 +120,7 @@ class AdvertService(
         }
     }
 
-    fun getLastAds(pageNumber: Int): ServiceResponse<List<AdItem>> {
+    fun getLastAds(pageNumber: Int, isForceRefrech: Boolean = false): ServiceResponse<List<AdItem>> {
         val list = advertRepository.findAll()
                 .sortedByDescending { it.date }
                 .filter { it.isShown }
@@ -138,10 +140,16 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(getPageSublist(list, pageNumber))
+        val resultList = if (isForceRefrech) {
+            getAllPagesFromList(list, pageNumber)
+        } else {
+            getPageSublist(list, pageNumber)
+        }
+
+        return ServiceResponse.Success(resultList)
     }
 
-    fun getMyAds(token: String, pageNumber: Int): ServiceResponse<List<AdItem>> {
+    fun getMyAds(token: String, pageNumber: Int, isForceRefrech: Boolean = false): ServiceResponse<List<AdItem>> {
         val account = accountRepository.getAccountByToken(token)
         val list = advertRepository.findAll()
                 .sortedByDescending { it.date }
@@ -162,10 +170,16 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(getPageSublist(list, pageNumber))
+        val resultList = if (isForceRefrech) {
+            getAllPagesFromList(list, pageNumber)
+        } else {
+            getPageSublist(list, pageNumber)
+        }
+
+        return ServiceResponse.Success(resultList)
     }
 
-    fun getBookmarks(token: String, pageNumber: Int): ServiceResponse<List<AdItem>> {
+    fun getBookmarks(token: String, pageNumber: Int, isForceRefrech: Boolean = false): ServiceResponse<List<AdItem>> {
         val account = accountRepository.getAccountByToken(token)
 
         val userBookmarkIds = account?.bookmarkIds?.map { it.bookmarkId } ?: emptyList()
@@ -189,10 +203,16 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(getPageSublist(list, pageNumber))
+        val resultList = if (isForceRefrech) {
+            getAllPagesFromList(list, pageNumber)
+        } else {
+            getPageSublist(list, pageNumber)
+        }
+
+        return ServiceResponse.Success(resultList)
     }
 
-    fun getAdRequests(pageNumber: Int): ServiceResponse<List<AdItem>> {
+    fun getAdRequests(pageNumber: Int, isForceRefrech: Boolean = false): ServiceResponse<List<AdItem>> {
         val list = advertRepository.findAll()
                 .sortedByDescending { it.date }
                 .filter { !it.isShown }
@@ -212,10 +232,16 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(getPageSublist(list, pageNumber))
+        val resultList = if (isForceRefrech) {
+            getAllPagesFromList(list, pageNumber)
+        } else {
+            getPageSublist(list, pageNumber)
+        }
+
+        return ServiceResponse.Success(resultList)
     }
 
-    fun getSearch(searchText: String, pageNumber: Int, sortType: Int): ServiceResponse<List<AdItem>> {
+    fun getSearch(searchText: String, pageNumber: Int, sortType: Int, isForceRefrech: Boolean = false): ServiceResponse<List<AdItem>> {
         if (searchText.isEmpty()) {
             return ServiceResponse.Success(emptyList())
         }
@@ -239,7 +265,13 @@ class AdvertService(
                     )
                 }
 
-        return ServiceResponse.Success(getPageSublist(list, pageNumber))
+        val resultList = if (isForceRefrech) {
+            getAllPagesFromList(list, pageNumber)
+        } else {
+            getPageSublist(list, pageNumber)
+        }
+
+        return ServiceResponse.Success(resultList)
     }
 
     fun getDetails(token: String, detailsId: Int): ServiceResponse<AdvertInfo> {
@@ -278,9 +310,16 @@ class AdvertService(
 
     private fun getPageSublist(list: List<AdItem>, pageNumber: Int): List<AdItem> {
         return when {
-            list.size < pageNumber * 30 -> emptyList()
-            list.size < pageNumber * 30 + 30 -> list.subList(pageNumber * 30, list.size)
-            else -> list.subList(pageNumber * 30, pageNumber * 30 + 30)
+            list.size < pageNumber * PAGE_SIZE -> emptyList()
+            list.size < pageNumber * PAGE_SIZE + PAGE_SIZE -> list.subList(pageNumber * PAGE_SIZE, list.size)
+            else -> list.subList(pageNumber * PAGE_SIZE, pageNumber * PAGE_SIZE + PAGE_SIZE)
+        }
+    }
+
+    private fun getAllPagesFromList(list: List<AdItem>, pageNumber: Int): List<AdItem> {
+        return when {
+            list.size < pageNumber * PAGE_SIZE + PAGE_SIZE -> list.subList(0, list.size)
+            else -> list.subList(0, pageNumber * PAGE_SIZE + PAGE_SIZE)
         }
     }
 }

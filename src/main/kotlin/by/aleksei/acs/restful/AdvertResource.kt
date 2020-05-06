@@ -89,9 +89,11 @@ class AdvertResource(
     @Path("lastAds")
     @Produces(MediaType.APPLICATION_JSON)
     fun getLastAds(@Context headers: HttpHeaders,
-                   @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
+                   @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE,
+                   @QueryParam("isForceRefresh") isForceRefresh: Boolean = false
+    ): Response =
             when (val headerResult = headerService.processHeaders(headers, true)) {
-                is ServiceResponse.Success -> getJsonResponse(advertService.getLastAds(pageNumber))
+                is ServiceResponse.Success -> getJsonResponse(advertService.getLastAds(pageNumber, isForceRefresh))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
@@ -99,9 +101,11 @@ class AdvertResource(
     @Path("myAds")
     @Produces(MediaType.APPLICATION_JSON)
     fun getMyAds(@Context headers: HttpHeaders,
-                 @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
+                 @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE,
+                 @QueryParam("isForceRefresh") isForceRefresh: Boolean = false
+    ): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
-                is ServiceResponse.Success -> getJsonResponse(advertService.getMyAds(headerResult.data, pageNumber))
+                is ServiceResponse.Success -> getJsonResponse(advertService.getMyAds(headerResult.data, pageNumber, isForceRefresh))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
@@ -109,9 +113,11 @@ class AdvertResource(
     @Path("bookmarks")
     @Produces(MediaType.APPLICATION_JSON)
     fun getBookmarks(@Context headers: HttpHeaders,
-                     @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
+                     @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE,
+                     @QueryParam("isForceRefresh") isForceRefresh: Boolean = false
+    ): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
-                is ServiceResponse.Success -> getJsonResponse(advertService.getBookmarks(headerResult.data, pageNumber))
+                is ServiceResponse.Success -> getJsonResponse(advertService.getBookmarks(headerResult.data, pageNumber, isForceRefresh))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
@@ -121,10 +127,12 @@ class AdvertResource(
     fun getSearch(@Context headers: HttpHeaders,
                   @QueryParam("searchText") searchText: String = EMPTY,
                   @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE,
-                  @QueryParam("searchType") searchType: Int = ALPHABET): Response =
+                  @QueryParam("searchType") searchType: Int = ALPHABET,
+                  @QueryParam("isForceRefresh") isForceRefresh: Boolean = false
+    ): Response =
             when (
                 val headerResult = headerService.processHeaders(headers, true)) {
-                is ServiceResponse.Success -> getJsonResponse(advertService.getSearch(searchText, pageNumber, searchType))
+                is ServiceResponse.Success -> getJsonResponse(advertService.getSearch(searchText, pageNumber, searchType, isForceRefresh))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
@@ -132,9 +140,11 @@ class AdvertResource(
     @Path("adRequests")
     @Produces(MediaType.APPLICATION_JSON)
     fun getAdRequests(@Context headers: HttpHeaders,
-                      @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE): Response =
+                      @QueryParam("pageNumber") pageNumber: Int = FIRST_PAGE,
+                      @QueryParam("isForceRefresh") isForceRefresh: Boolean = false
+    ): Response =
             when (val headerResult = headerService.processHeaders(headers)) {
-                is ServiceResponse.Success -> getJsonResponse(advertService.getAdRequests(pageNumber))
+                is ServiceResponse.Success -> getJsonResponse(advertService.getAdRequests(pageNumber, isForceRefresh))
                 is ServiceResponse.Error -> Response.ok(headerResult).build()
             }
 
