@@ -246,9 +246,29 @@ class AdvertService(
             return ServiceResponse.Success(emptyList())
         }
 
+        val words = searchText
+                .split(Regex("\\s"))
+                .filter { it.length > 1 }
+                .map { it.toLowerCase() }
+
         val list = advertRepository.findAll()
                 .sortedByDescending { it.date }
-                .filter { it.title.contains(searchText) && it.isShown }
+                .filter { advert ->
+                    if (!advert.isShown) {
+                        return@filter false
+                    }
+
+                    val title = advert.title.toLowerCase()
+                    val synopsis = advert.synopsis.toLowerCase()
+
+                    words.forEach { word ->
+                        if (title.contains(word) || synopsis.contains(word)) {
+                            return@filter true
+                        }
+                    }
+
+                    return@filter false
+                }
                 .map {
                     AdItem(
                             id = it.id.toString(),
